@@ -1,0 +1,107 @@
+import torch
+from ultralytics import YOLO
+import os
+from src.av_utils import load_image_with_av, save_image_with_av
+
+
+def run_yolo(frames_dir: str, frame_files: list, yolo_configs: dict, model_path: str, fps_rounded: int):
+    # if not os.path.exists(model_path):
+    #     raise FileNotFoundError(f"YOLO model file not found: {model_path}")
+
+    device = "cuda" if torch.cuda.is_available() else "cpu"
+    print(f"Using device: {device} for YOLO inference")
+    model = YOLO(model_path)
+    model.to(device)
+
+    batch_size = yolo_configs["BATCH_SIZE_GPU"] if device == "cuda" else yolo_configs["BATCH_SIZE_CPU"]
+    frames_batch = []
+    seconds_batch = []
+    frame_numbers_batch = []
+    multiple_people_detected = []
+    absence_detected = []
+
+    def process():
+        results = model(
+            frames_batch,
+            conf=yolo_configs["YOLO_CONFIDENCE"],
+            device=device,
+            verbose=False,
+        )
+
+        for i, r in enumerate(results):
+            confidences = [float(box.conf[0]) for box in r.boxes if int(box.cls[0]) == yolo_configs["PERSON_CLASS_ID"]]
+
+            num_people = len(confidences)
+            sec_val = seconds_batch[i]
+            frame_num = frame_numbers_batch[i]
+
+            # -----------------------------------------------------------------
+            # MULTIPLE PEOPLE DETECTION
+            # -----------------------------------------------------------------
+            if num_people > yolo_configs["MULTIPLE_PEOPLE_THRESHOLD"]:
+                confidences.sort(reverse=True)
+
+                if confidences[1] < yolo_configs["YOLO_CONFIDENCE_CONFIRMED"]:
+                    # frame_name = f"{yolo_configs['INTERVIEW_ID']}_{sec_val:04d}.jpg"
+                    # frame_path = os.path.join(yolo_configs["FRAMES_DIR"], frame_name)
+                    continue
+
+                frame_name = f"{yolo_configs['INTERVIEW_ID']}_{frame_num}_sec_{sec_val}_multiple.jpg"
+                frame_path = os.path.join(yolo_configs["MULTIPLE_PEOPLE_DIR"], frame_name)
+                saved = save_image_with_av(frames_batch[i], frame_path)
+
+                if saved:
+                    multiple_people_detected.append(
+                        {
+                            "violation_type": "multiple_people",
+                            "time_seconds": sec_val,
+                            "time_minutes": round(sec_val / 60, 2),
+                            "frame_number": frame_num,
+                            "num_people": num_people,
+                            "confidence": confidences,
+                            "frame_name": frame_name,
+                            "frame_path": frame_path,
+                        }
+                    )
+                else:
+                    print(f"WARNING: Failed to save frame: {frame_path}")
+
+            # -----------------------------------------------------------------
+            # ABSENCE DETECTION
+            # -----------------------------------------------------------------
+            elif num_people <= yolo_configs["ABSENCE_THRESHOLD"]:
+                absence_detected.append(
+                    {
+                        "violation_type": "absence",
+                        "time_seconds": sec_val,
+                        "time_minutes": round(sec_val / 60, 2),
+                        "frame_number": frame_num,
+                        "num_people": 0,
+                        "confidence": [],
+                    }
+                )
+
+    for idx, frame_file in enumerate(frame_files):
+        frame_path = os.path.join(frames_dir, frame_file)
+        print(f"Processing frame {idx + 1}/{len(frame_files)}", end="\r")
+
+        frame = load_image_with_av(frame_path)
+        if frame is None:
+            print(f"WARNING: Could not read frame: {frame_path} — skipping")
+            continue
+
+        sec_val = idx * yolo_configs["FRAME_SAMPLE_INTERVAL"]
+        frame_number = int(sec_val * fps_rounded)
+        frames_batch.append(frame)
+        seconds_batch.append(sec_val)
+        frame_numbers_batch.append(frame_number)
+
+        if len(frames_batch) >= batch_size or idx == len(frame_files) - 1:
+            process()
+            frames_batch.clear()
+            seconds_batch.clear()
+            frame_numbers_batch.clear()
+
+    print()  # Clear the loading line
+
+    return multiple_people_detected, absence_detected

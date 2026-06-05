@@ -1,0 +1,6 @@
+.venv
+.vscode
+input
+output
+__pycache__
+models
