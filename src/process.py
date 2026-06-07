@@ -1,10 +1,10 @@
 import os
 from src.frame_extraction import frame_extraction
 from src.video_metadata import video_metadata
-from src.run_yolo import run_yolo
+from src.run_yolo import run_YOLOv8, run_YOLOv26
 
 
-def process(video_path: str, models: list[str]) -> None:
+def process(video_path: str, models_v8: list[str], models_v26: list[str]) -> None:
     # basic configuration and setup
     if not os.path.exists(video_path):
         print(f"[Error]: Video file {video_path} does not exist.")
@@ -49,16 +49,20 @@ def process(video_path: str, models: list[str]) -> None:
         "total_frames": total_frames,
     }
 
-    for model in models:
+    for model in models_v8:
         model_path = os.path.join("models", model)
         print(f"Running YOLO model: {model} on frames...")
 
-        multiple_people_detected, absence_detected = run_yolo(frames_dir, frame_files, yolo_configs, model_path, fps_rounded)
+        data = run_YOLOv8(frames_dir, frame_files, yolo_configs, model_path, fps_rounded)
+        json_data[model] = data
 
-        json_data[model] = {
-            "multiple_people_detected": multiple_people_detected,
-            "absence_detected": absence_detected,
-        }
+    for model in models_v26:
+        model_path = os.path.join("models", model)
+        print(f"Running YOLO model: {model} on frames...")
+
+        data = run_YOLOv26(frames_dir, frame_files, yolo_configs, model_path, fps_rounded)
+
+        json_data[model] = data
 
     # save results to JSON
     output_json_path = os.path.join(interview_path, f"{interview_id}_results.json")
