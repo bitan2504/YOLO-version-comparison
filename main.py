@@ -17,23 +17,25 @@ models_pose = [
 ]
 
 models_v26 = [
-    "yolo26n.pt",
-    "yolo26s.pt",
-    "yolo26m.pt",
-    "yolo26l.pt",
-    "yolo26x.pt",
+    # "yolo26n.pt",
+    # "yolo26s.pt",
+    # "yolo26m.pt",
+    # "yolo26l.pt",
+    # "yolo26x.pt",
 ]
 
 video_paths = [
-    "input/694121e9f7e54c4adf74ade7_final_camera.mp4",
-    "input/69422f3af3ff46e9da4a8f49_final_camera.mp4",
-    "input/6944fba2f3ff46e9da4b5d12_final_camera.mp4",
-    "input/694562cd0bb70fa3a440721e_final_camera.mp4",
-    "input/694a8baf524205756b53b515_final_camera.mp4",
-    "input/694e3f763f538ba966a75877_final_camera.mp4",
-    "input/695d0b8a45375bf805a59a22_final_camera.mp4",
-    "input/69620cc245375bf805a6f488_final_camera.mp4",
-    "input/6936fce7df612f1f12a9697b_final_camera.mp4"
+    # "input/694121e9f7e54c4adf74ade7_final_camera.mp4",
+    # "input/69422f3af3ff46e9da4a8f49_final_camera.mp4",
+    # "input/6944fba2f3ff46e9da4b5d12_final_camera.mp4",
+    # "input/694562cd0bb70fa3a440721e_final_camera.mp4",
+    # "input/694a8baf524205756b53b515_final_camera.mp4",
+    # "input/694e3f763f538ba966a75877_final_camera.mp4",
+    # "input/695d0b8a45375bf805a59a22_final_camera.mp4",
+    # "input/69620cc245375bf805a6f488_final_camera.mp4",
+    # "input/6936fce7df612f1f12a9697b_final_camera.mp4",
+    "input/6a17e5b58f4cd056c6b449fc_final_camera.mp4",
+    "input/6a27f96c00ceb75bfffa5dd7_final_camera.mp4"
 ]
 
 if __name__ == "__main__":

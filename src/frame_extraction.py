@@ -10,7 +10,7 @@ def frame_extraction(
         (
             ffmpeg.input(video_path)
             .output(
-                os.path.join(frames_dir, f"{interview_id}_%04d.jpg"),
+                os.path.join(frames_dir, f"%08d.jpg"),
                 vf=f"select='not(mod(n,{fps_rounded}))'",
                 fps_mode="passthrough",
                 start_number="0",
