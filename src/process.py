@@ -29,7 +29,7 @@ def process(video_path: str, models_v8: list[str], models_pose: list[str], model
     os.makedirs(interview_path, exist_ok=True)
     frames_dir = os.path.join(interview_path, "frames")
     os.makedirs(frames_dir, exist_ok=True)
-    print(f"\nProcessing interview with ID: {interview_id}")
+    print(f"\n{'='*20} Processing interview with ID: {interview_id} {'='*20}")
 
     duration, fps, fps_rounded, total_frames = video_metadata(video_path)
     interview_metadata = {
