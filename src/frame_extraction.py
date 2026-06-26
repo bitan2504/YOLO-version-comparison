@@ -2,10 +2,7 @@ import os
 import ffmpeg
 
 
-def frame_extraction(
-    video_path: str, frames_dir: str, interview_id: str, fps_rounded: int
-) -> None:
-    print(f"Extracting frames from video: {video_path}")
+def frame_extraction(video_path: str, frames_dir: str, interview_id: str, fps_rounded: int) -> None:
     try:
         (
             ffmpeg.input(video_path)
@@ -23,8 +20,6 @@ def frame_extraction(
             .global_args("-loglevel", "error")
             .run(overwrite_output=True)
         )
-
-        print(f"Frame extraction completed. Frames saved to: {frames_dir}")
 
     except ffmpeg.Error as e:
         print(f"ffmpeg error during frame extraction: {e.stderr.decode()}")
